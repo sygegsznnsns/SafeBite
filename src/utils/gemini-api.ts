@@ -178,21 +178,15 @@ async function convertImageToBase64(url: string): Promise<{ base64: string; mime
  */
 async function callGeminiAPIForJSON<T>(messages: Message[], options: ImageAnalysisOptions): Promise<T> {
   const {
-    apiKey: optApiKey,
-    baseURL: optBaseURL,
+    apiKey,
+    baseURL = 'https://meta-backend-sandbox.camscanner.com/us/',
     temperature = 0.3, // 降低温度以获得更稳定的 JSON 输出
     maxTokens = 4096,
     onError = (error: Error) => console.error('API Error:', error)
   } = options
 
-  // 优先使用 options 中的值，其次使用 Vite 环境变量 VITE_GEMINI_API_KEY / VITE_GEMINI_BASE_URL，最后回退到原默认
-  // 使用 (import.meta as any).env 以兼容 TypeScript 在非 Vite 环境下的类型检查
-  const env: any = (typeof import.meta !== 'undefined' ? (import.meta as any).env : {}) || {}
-  const apiKey = optApiKey || env.VITE_GEMINI_API_KEY
-  const baseURL = optBaseURL || env.VITE_GEMINI_BASE_URL || 'https://meta-backend-sandbox.camscanner.com/us/'
-
   if (!apiKey) {
-    throw new Error('API key is required. Provide it via options.apiKey or set VITE_GEMINI_API_KEY in your .env')
+    throw new Error('API key is required')
   }
 
   const requestBody = {
@@ -602,20 +596,16 @@ export async function smartAnalyzeImage(
  */
 async function callGeminiAPIForStream(messages: Message[], onChunk: (chunk: string) => void, options: ImageAnalysisOptions): Promise<void> {
   const {
-    apiKey: optApiKey,
-    baseURL: optBaseURL,
+    apiKey,
+    baseURL = 'https://meta-backend-sandbox.camscanner.com/us/',
     temperature = 0.7,
     maxTokens = 4096,
     onError = (error: Error) => console.error('API Error:', error),
     onComplete = () => {}
   } = options
 
-  const env: any = (typeof import.meta !== 'undefined' ? (import.meta as any).env : {}) || {}
-  const apiKey = optApiKey || env.VITE_GEMINI_API_KEY
-  const baseURL = optBaseURL || env.VITE_GEMINI_BASE_URL || 'https://meta-backend-sandbox.camscanner.com/us/'
-
   if (!apiKey) {
-    throw new Error('API key is required. Provide it via options.apiKey or set VITE_GEMINI_API_KEY in your .env')
+    throw new Error('API key is required')
   }
 
   const requestBody: RequestBody = {
