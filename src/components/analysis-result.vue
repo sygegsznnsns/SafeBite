@@ -25,8 +25,9 @@ const isAnalyzing = ref(true)
 const analysisResult = ref<SmartAnalysisResult | null>(null)
 const errorMessage = ref('')
 
-// API 配置
-const API_KEY = 'sk-HckOTNtX3EiYlwIn6d07Dd73638948A1881177Ca6e00F24d'
+// 从 .env 读取 API Key（Vite 约定需要 VITE_ 前缀）
+const API_KEY = (import.meta as any).env.VITE_DASHSCOPE_API_KEY as string | undefined
+const BASE_URL = (import.meta as any).env.VITE_DASHSCOPE_BASE_URL as string | undefined
 
 onMounted(async () => {
   if (props.allergens) {
@@ -52,8 +53,15 @@ const performAnalysis = async () => {
   errorMessage.value = ''
 
   try {
+    if (!API_KEY) {
+      isAnalyzing.value = false
+      errorMessage.value = '未配置 API 密钥，请在 .env 中设置 VITE_DASHSCOPE_API_KEY'
+      ElMessage.error('未配置 API 密钥，请在 .env 中设置 VITE_DASHSCOPE_API_KEY')
+      return
+    }
     const result = await smartAnalyzeImage(props.imageUrl, allergenList.value, {
       apiKey: API_KEY,
+      baseURL: BASE_URL,
       detail: 'high',
       maxTokens: 4096,
       temperature: 0.3,
