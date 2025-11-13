@@ -144,6 +144,13 @@ function getMimeTypeFromUrl(url: string): string {
 }
 
 /**
+ * 规范化 API 基础地址，确保以斜杠结尾
+ */
+function normalizeBaseURL(url: string): string {
+  return url.endsWith('/') ? url : url + '/'
+}
+
+/**
  * 将图片 URL 转换为 Base64
  */
 async function convertImageToBase64(url: string): Promise<{ base64: string; mimeType: string }> {
@@ -179,7 +186,7 @@ async function convertImageToBase64(url: string): Promise<{ base64: string; mime
 async function callGeminiAPIForJSON<T>(messages: Message[], options: ImageAnalysisOptions): Promise<T> {
   const {
     apiKey,
-    baseURL = 'https://meta-backend-sandbox.camscanner.com/us/',
+    baseURL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/',
     temperature = 0.3, // 降低温度以获得更稳定的 JSON 输出
     maxTokens = 4096,
     onError = (error: Error) => console.error('API Error:', error)
@@ -190,7 +197,7 @@ async function callGeminiAPIForJSON<T>(messages: Message[], options: ImageAnalys
   }
 
   const requestBody = {
-    model: 'gemini-2.5-flash-preview-09-2025',
+    model: 'qwen3-vl-flash',
     messages,
     stream: false, // 非流式
     temperature,
@@ -199,7 +206,7 @@ async function callGeminiAPIForJSON<T>(messages: Message[], options: ImageAnalys
   }
 
   try {
-    const response = await fetch(`${baseURL}v1/chat/completions`, {
+    const response = await fetch(`${normalizeBaseURL(baseURL)}chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -597,7 +604,7 @@ export async function smartAnalyzeImage(
 async function callGeminiAPIForStream(messages: Message[], onChunk: (chunk: string) => void, options: ImageAnalysisOptions): Promise<void> {
   const {
     apiKey,
-    baseURL = 'https://meta-backend-sandbox.camscanner.com/us/',
+    baseURL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/',
     temperature = 0.7,
     maxTokens = 4096,
     onError = (error: Error) => console.error('API Error:', error),
@@ -609,7 +616,7 @@ async function callGeminiAPIForStream(messages: Message[], onChunk: (chunk: stri
   }
 
   const requestBody: RequestBody = {
-    model: 'gemini-2.5-flash-preview-09-2025',
+    model: 'qwen3-vl-flash',
     messages,
     stream: true,
     temperature,
@@ -617,7 +624,7 @@ async function callGeminiAPIForStream(messages: Message[], onChunk: (chunk: stri
   }
 
   try {
-    const response = await fetch(`${baseURL}v1/chat/completions`, {
+    const response = await fetch(`${normalizeBaseURL(baseURL)}chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
